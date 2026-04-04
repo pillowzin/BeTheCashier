@@ -1,0 +1,13 @@
+pub const WINDOW_WIDTH: i32 = 768;
+pub const WINDOW_HEIGHT: i32 = 576;
+pub const PLAYER_SPEED: f32 = 450.0;
+pub const CAMERA_ZOOM: f32 = 2.7;
+pub const PLAYER_SIZE: f32 = 32.0;
+pub const PLAYER_VISUAL_SIZE: f32 = 24.0;
+pub const BORDER_LEFT: f32 = 10.0;
+pub const BORDER_RIGHT: f32 = 10.0;
+pub const BORDER_BOTTOM: f32 = 10.0;
+pub const BORDER_TOP: f32 = 48.0;
+pub const CAMERA_SHAKE_FREQ_X: f32 = 18.0;
+pub const CAMERA_SHAKE_FREQ_Y: f32 = 23.0;
+pub const CAMERA_SHAKE_AMOUNT: f32 = 1.25;
