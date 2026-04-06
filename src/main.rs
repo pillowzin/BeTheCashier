@@ -2,7 +2,9 @@ use macroquad::prelude::*;
 
 mod config;
 mod host;
+mod world;
 
+use world::World;
 use config::*;
 use host::Player;
 
@@ -22,10 +24,12 @@ async fn main() {
     let mut player = Player::new().await;
 
     // 🔥 carrega a cena
-    let scene = load_texture("sprites/scene.png").await.unwrap();
-    scene.set_filter(FilterMode::Nearest);
+    let world = World::new().await;
+    let scene_size = vec2(
+        world.width() as f32 * TILE_SIZE,
+        world.height() as f32 * TILE_SIZE,
+    );
 
-    let scene_size = vec2(scene.width(), scene.height());
     let mut camera = Camera2D::from_display_rect(Rect::new(0.0, 0.0, scene_size.x, scene_size.y));
 
     let mut accumulator = 0.0;
@@ -36,6 +40,7 @@ async fn main() {
 
         while accumulator >= FIXED_DT {
             player.update(FIXED_DT);
+            player.collide_with_world(&world);
             player.clamp_to_scene(scene_size);
             accumulator -= FIXED_DT;
         }
@@ -92,7 +97,7 @@ async fn main() {
         set_camera(&camera);
 
         // 🔥 desenha mundo
-        draw_texture(&scene, 0.0, 0.0, WHITE);
+        world.draw();
         player.draw();
 
         // volta pra UI (se precisar depois)

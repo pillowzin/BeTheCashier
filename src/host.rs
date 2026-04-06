@@ -1,8 +1,10 @@
 use crate::config::*;
+use crate::world::World;
 use macroquad::prelude::*;
 
 pub struct Player {
     pub position: Vec2,
+    previous_position: Vec2,
     velocity: Vec2,
     texture: Texture2D,
     frame: i32,
@@ -12,12 +14,15 @@ pub struct Player {
 }
 
 impl Player {
+    const COLLISION_SIZE: f32 = 16.0;
+
     pub async fn new() -> Self {
         let texture = load_texture("sprites/host.png").await.unwrap();
         texture.set_filter(FilterMode::Nearest);
 
         Self {
             position: vec2(100.0, 100.0),
+            previous_position: vec2(100.0, 100.0),
             velocity: Vec2::ZERO,
             texture,
             frame: 0,
@@ -39,6 +44,7 @@ impl Player {
     }
 
     pub fn update(&mut self, dt: f32) {
+        self.previous_position = self.position;
         self.velocity = Vec2::ZERO;
 
         let was_running = self.is_running;
@@ -88,18 +94,30 @@ impl Player {
         }
     }
 
+    pub fn is_moving(&self) -> bool {
+        self.velocity.length_squared() > 0.0
+    }
+
+    pub fn collide_with_world(&mut self, world: &World) {
+        let inset = (PLAYER_SIZE - Self::COLLISION_SIZE) * 0.5;
+        let collision_position = self.position + vec2(inset, inset);
+        let size = vec2(Self::COLLISION_SIZE, Self::COLLISION_SIZE);
+
+        if !world.is_solid_tile_at_world(collision_position, size) {
+            return;
+        }
+
+        self.position = self.previous_position;
+    }
+
     pub fn clamp_to_scene(&mut self, scene_size: Vec2) {
-        let min_x = BORDER_LEFT;
-        let min_y = BORDER_TOP;
-        let max_x = (scene_size.x - BORDER_RIGHT - PLAYER_SIZE).max(min_x);
-        let max_y = (scene_size.y - BORDER_BOTTOM - PLAYER_SIZE).max(min_y);
+        let min_x = 0.0;
+        let min_y = 0.0;
+        let max_x = (scene_size.x - PLAYER_SIZE).max(min_x);
+        let max_y = (scene_size.y - PLAYER_SIZE).max(min_y);
 
         self.position.x = self.position.x.clamp(min_x, max_x);
         self.position.y = self.position.y.clamp(min_y, max_y);
-    }
-
-    pub fn is_moving(&self) -> bool {
-        self.velocity.length_squared() > 0.0
     }
 
     pub fn draw(&self) {
